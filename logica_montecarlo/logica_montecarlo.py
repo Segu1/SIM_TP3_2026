@@ -168,7 +168,7 @@ def montecarlo_step(state: dict):
         "min_tiempo": min_tiempo
     }
 
-    return new_state, row, promedio, porcentaje
+    return new_state, row
     
 
     
