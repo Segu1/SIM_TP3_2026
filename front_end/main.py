@@ -74,7 +74,7 @@ tabla = dbc.Card(
     dbc.CardBody(
         DataTable(
             id="tabla",
-            page_action="none",  # 🔥 muestra TODO
+            page_action="none",  #  muestra TODO
             fixed_rows={"headers": True},
             style_table={"height": "60vh", "overflowY": "auto"},
             style_cell={"textAlign": "center", "fontSize": 13},
@@ -140,7 +140,7 @@ def run_sim(n_clicks, n, j, i):
         if start <= row["Iteración"] <= end:
             subset.append(row)
 
-    # 🔥 siempre agrego la última si no está
+    # siempre agrego la última si no está
     if last and (last["Iteración"] > end):
         subset.append(last)
 
