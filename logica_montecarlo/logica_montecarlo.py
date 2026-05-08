@@ -175,18 +175,16 @@ def montecarlo_step(state: dict):
     # ==================================================
     # DEMORA
     # ==================================================
-
-    rnd_demora = random.random()
-
     incremento = 0
-
     if formato in ["imagen", "video"]:
-
+        rnd_demora = random.random()
         if hay_demora(rnd_demora):
 
             incremento = 0.8 * tiempo_base
 
             tiempo_total += incremento
+    else:
+        rnd_demora = None
 
     # ==================================================
     # ACCIÓN EXTRA
@@ -280,17 +278,17 @@ def montecarlo_step(state: dict):
         # ================= EDICIÓN =================
 
         "rnd_edic":
-            round(rnd_edicion, 4),
+            round(rnd_edicion, 2),
 
         "Edición":
             "Sí" if hay_edicion_flag else "No",
 
         "rnd_norm_r1":
-            round(rnd_norm_r1, 4)
+            round(rnd_norm_r1, 2)
             if rnd_norm_r1 is not None else "-",
 
         "rnd_norm_r2":
-            round(rnd_norm_r2, 4)
+            round(rnd_norm_r2, 2)
             if rnd_norm_r2 is not None else "-",
 
         "Tiempo edición":
@@ -299,7 +297,8 @@ def montecarlo_step(state: dict):
         # ================= DEMORA =================
 
         "rnd_dem":
-            round(rnd_demora, 4),
+            round(rnd_demora, 2)
+            if rnd_demora is not None else "-",
 
         "Rehacer - Demora":
             "Sí" if incremento > 0 else "No",
@@ -310,13 +309,13 @@ def montecarlo_step(state: dict):
         # ================= EXTRA =================
 
         "rnd_ext":
-            round(rnd_extra, 4),
+            round(rnd_extra, 2),
 
         "Acc. Extra":
             "Sí" if hay_extra_flag else "No",
 
         "rnd_exp":
-            round(rnd_exp, 4)
+            round(rnd_exp, 2)
             if rnd_exp is not None else "-",
 
         "Tiempo extra":
