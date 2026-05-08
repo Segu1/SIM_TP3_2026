@@ -1,10 +1,6 @@
 import math
 import random
 
-
-import random
-import math
-
 # =======================
 # DISTRIBUCIONES
 # =======================
@@ -58,28 +54,52 @@ def dist_exp_tiempo_extra(media=8):
 
 
 # =======================
-# TABLAS
+# TABLAS PARAMETRIZADAS
 # =======================
 
-def tabla_accion_extra(freq: float) -> int:
-    return 1 if freq <= 0.25 else 0
+def tabla_accion_extra(
+        freq: float,
+        prob_extra: float
+) -> int:
+
+    return 1 if freq <= prob_extra else 0
 
 
-def tabla_de_freq_formatos(freq: float) -> str:
-    if freq < 0.3:
+def tabla_de_freq_formatos(
+        freq: float,
+        prob_imagen: float,
+        prob_carrusel: float
+) -> str:
+
+    if freq < prob_imagen:
+
         return "imagen"
-    elif freq < 0.4:
+
+    elif freq < (
+            prob_imagen + prob_carrusel
+    ):
+
         return "carrusel"
+
     else:
+
         return "video"
 
 
-def se_realiza_edicion(freq: float) -> int:
-    return 1 if freq < 0.65 else 0
+def se_realiza_edicion(
+        freq: float,
+        prob_edicion: float
+) -> int:
+
+    return 1 if freq < prob_edicion else 0
 
 
-def hay_demora(freq: float) -> int:
-    return 1 if freq <= 0.35 else 0
+def hay_demora(
+        freq: float,
+        prob_demora: float
+) -> int:
+
+    return 1 if freq <= prob_demora else 0
 
 
 # =======================
@@ -96,9 +116,12 @@ def montecarlo_step(state: dict):
     # =====================
 
     n = int(state["n"])
+
     i = int(state["i"])
 
-    total_tiempo = float(state["total_tiempo"])
+    total_tiempo = float(
+        state["total_tiempo"]
+    )
 
     cont_edicion_y_extra = int(
         state["cont_edicion_y_extra"]
@@ -107,8 +130,6 @@ def montecarlo_step(state: dict):
     cont_sin_pausa_sin_extra = int(
         state["cont_sin_pausa_sin_extra"]
     )
-
-    # NUEVOS CONTADORES
 
     cont_acciones_extra = int(
         state["cont_acciones_extra"]
@@ -122,8 +143,37 @@ def montecarlo_step(state: dict):
         state["cont_mayor_60_min"]
     )
 
-    max_tiempo = float(state["max_tiempo"])
-    min_tiempo = float(state["min_tiempo"])
+    max_tiempo = float(
+        state["max_tiempo"]
+    )
+
+    min_tiempo = float(
+        state["min_tiempo"]
+    )
+
+    # =====================
+    # PROBABILIDADES
+    # =====================
+
+    prob_extra = float(
+        state["prob_extra"]
+    )
+
+    prob_imagen = float(
+        state["prob_imagen"]
+    )
+
+    prob_carrusel = float(
+        state["prob_carrusel"]
+    )
+
+    prob_edicion = float(
+        state["prob_edicion"]
+    )
+
+    prob_demora = float(
+        state["prob_demora"]
+    )
 
     # =====================
     # NUEVA ITERACIÓN
@@ -139,13 +189,19 @@ def montecarlo_step(state: dict):
 
     rnd_formato = random.random()
 
-    formato = tabla_de_freq_formatos(rnd_formato)
+    formato = tabla_de_freq_formatos(
+        rnd_formato,
+        prob_imagen,
+        prob_carrusel
+    )
 
     # ==================================================
     # TIEMPO BASE (UNIFORME)
     # ==================================================
 
-    tiempo_base, rnd_uniforme = dist_uniforme_tiempo()
+    tiempo_base, rnd_uniforme = (
+        dist_uniforme_tiempo()
+    )
 
     tiempo_total += tiempo_base
 
@@ -155,7 +211,12 @@ def montecarlo_step(state: dict):
 
     rnd_edicion = random.random()
 
-    hay_edicion_flag = se_realiza_edicion(rnd_edicion)
+    hay_edicion_flag = (
+        se_realiza_edicion(
+            rnd_edicion,
+            prob_edicion
+        )
+    )
 
     tiempo_edicion = 0
 
@@ -175,15 +236,26 @@ def montecarlo_step(state: dict):
     # ==================================================
     # DEMORA
     # ==================================================
-    incremento = 0
-    if formato in ["imagen", "video"]:
-        rnd_demora = random.random()
-        if hay_demora(rnd_demora):
 
-            incremento = 0.8 * tiempo_base
+    incremento = 0
+
+    if formato in ["imagen", "video"]:
+
+        rnd_demora = random.random()
+
+        if hay_demora(
+                rnd_demora,
+                prob_demora
+        ):
+
+            incremento = (
+                0.8 * tiempo_base
+            )
 
             tiempo_total += incremento
+
     else:
+
         rnd_demora = None
 
     # ==================================================
@@ -192,7 +264,12 @@ def montecarlo_step(state: dict):
 
     rnd_extra = random.random()
 
-    hay_extra_flag = tabla_accion_extra(rnd_extra)
+    hay_extra_flag = (
+        tabla_accion_extra(
+            rnd_extra,
+            prob_extra
+        )
+    )
 
     tiempo_extra = 0
 
@@ -200,7 +277,10 @@ def montecarlo_step(state: dict):
 
     if hay_extra_flag:
 
-        tiempo_extra, rnd_exp = dist_exp_tiempo_extra()
+        (
+            tiempo_extra,
+            rnd_exp
+        ) = dist_exp_tiempo_extra()
 
         tiempo_total += tiempo_extra
 
@@ -209,14 +289,17 @@ def montecarlo_step(state: dict):
     # =====================
 
     if hay_extra_flag:
+
         cont_acciones_extra += 1
 
     if formato == "carrusel":
+
         cont_carrusel += 1
 
     # MÁS DE 60 MINUTOS
 
     if tiempo_total > 60:
+
         cont_mayor_60_min += 1
 
     # =====================
@@ -225,27 +308,48 @@ def montecarlo_step(state: dict):
 
     total_tiempo += tiempo_total
 
-    if hay_edicion_flag and hay_extra_flag:
+    if (
+            hay_edicion_flag
+            and hay_extra_flag
+    ):
+
         cont_edicion_y_extra += 1
 
-    if not hay_edicion_flag and not hay_extra_flag:
+    if (
+            not hay_edicion_flag
+            and not hay_extra_flag
+    ):
+
         cont_sin_pausa_sin_extra += 1
 
-    max_tiempo = max(max_tiempo, tiempo_total)
+    max_tiempo = max(
+        max_tiempo,
+        tiempo_total
+    )
 
-    min_tiempo = min(min_tiempo, tiempo_total)
+    min_tiempo = min(
+        min_tiempo,
+        tiempo_total
+    )
 
     i = iter_idx
 
-    promedio = total_tiempo / i if i > 0 else 0
+    promedio = (
+        total_tiempo / i
+        if i > 0 else 0
+    )
 
     porcentaje = (
-        (cont_edicion_y_extra / i) * 100
+        (
+            cont_edicion_y_extra / i
+        ) * 100
         if i > 0 else 0
     )
 
     porcentaje_mayor_60 = (
-        (cont_mayor_60_min / i) * 100
+        (
+            cont_mayor_60_min / i
+        ) * 100
         if i > 0 else 0
     )
 
@@ -257,7 +361,8 @@ def montecarlo_step(state: dict):
 
         # ================= ITERACIÓN =================
 
-        "Iteración": iter_idx,
+        "Iteración":
+            iter_idx,
 
         # ================= FORMATO =================
 
@@ -281,15 +386,19 @@ def montecarlo_step(state: dict):
             round(rnd_edicion, 2),
 
         "Edición":
-            "Sí" if hay_edicion_flag else "No",
+            "Sí"
+            if hay_edicion_flag
+            else "No",
 
         "rnd_norm_r1":
             round(rnd_norm_r1, 2)
-            if rnd_norm_r1 is not None else "-",
+            if rnd_norm_r1
+            is not None else "-",
 
         "rnd_norm_r2":
             round(rnd_norm_r2, 2)
-            if rnd_norm_r2 is not None else "-",
+            if rnd_norm_r2
+            is not None else "-",
 
         "Tiempo edición":
             tiempo_edicion,
@@ -298,10 +407,13 @@ def montecarlo_step(state: dict):
 
         "rnd_dem":
             round(rnd_demora, 2)
-            if rnd_demora is not None else "-",
+            if rnd_demora
+            is not None else "-",
 
         "Rehacer - Demora":
-            "Sí" if incremento > 0 else "No",
+            "Sí"
+            if incremento > 0
+            else "No",
 
         "Incremento":
             round(incremento, 2),
@@ -312,11 +424,14 @@ def montecarlo_step(state: dict):
             round(rnd_extra, 2),
 
         "Acc. Extra":
-            "Sí" if hay_extra_flag else "No",
+            "Sí"
+            if hay_extra_flag
+            else "No",
 
         "rnd_exp":
             round(rnd_exp, 2)
-            if rnd_exp is not None else "-",
+            if rnd_exp
+            is not None else "-",
 
         "Tiempo extra":
             tiempo_extra,
@@ -353,7 +468,10 @@ def montecarlo_step(state: dict):
             cont_mayor_60_min,
 
         "% Trabajos > 60 min":
-            round(porcentaje_mayor_60, 2),
+            round(
+                porcentaje_mayor_60,
+                2
+            ),
 
         "Máximo tiempo":
             round(max_tiempo, 2),
@@ -367,8 +485,12 @@ def montecarlo_step(state: dict):
     # =====================
 
     new_state = {
-        "n": n,
-        "i": i,
+
+        "n":
+            n,
+
+        "i":
+            i,
 
         "total_tiempo":
             total_tiempo,
@@ -392,7 +514,26 @@ def montecarlo_step(state: dict):
             max_tiempo,
 
         "min_tiempo":
-            min_tiempo
+            min_tiempo,
+
+        # =================
+        # PROBABILIDADES
+        # =================
+
+        "prob_extra":
+            prob_extra,
+
+        "prob_imagen":
+            prob_imagen,
+
+        "prob_carrusel":
+            prob_carrusel,
+
+        "prob_edicion":
+            prob_edicion,
+
+        "prob_demora":
+            prob_demora
     }
 
     return new_state, row
@@ -403,7 +544,9 @@ def montecarlo_step(state: dict):
 # =======================
 
 state = {
+
     "n": 1000,
+
     "i": 0,
 
     "total_tiempo": 0,
@@ -420,5 +563,19 @@ state = {
 
     "max_tiempo": 0,
 
-    "min_tiempo": 999999
+    "min_tiempo": 999999,
+
+    # ===================
+    # PROBABILIDADES
+    # ===================
+
+    "prob_extra": 0.25,
+
+    "prob_imagen": 0.30,
+
+    "prob_carrusel": 0.10,
+
+    "prob_edicion": 0.65,
+
+    "prob_demora": 0.35
 }

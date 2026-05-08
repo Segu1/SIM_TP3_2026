@@ -1,7 +1,8 @@
 # =======================
 #  APP
 # =======================
-from dash import Output, Input, State, Dash, html, dcc, exceptions
+
+from dash import Output, Input, State, Dash, html
 from dash.dash_table import DataTable
 import dash_bootstrap_components as dbc
 
@@ -10,7 +11,10 @@ from logica_montecarlo import logica_montecarlo
 app = Dash(
     __name__,
     title="TP Montecarlo",
-    external_stylesheets=[dbc.themes.BOOTSTRAP, dbc.icons.BOOTSTRAP]
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP,
+        dbc.icons.BOOTSTRAP
+    ]
 )
 
 # =======================
@@ -42,6 +46,11 @@ form_card = dbc.Card(
 
         dbc.CardBody(
             [
+
+                # ===================
+                # FILA 1
+                # ===================
+
                 dbc.Row([
 
                     dbc.Col([
@@ -71,6 +80,80 @@ form_card = dbc.Card(
                             id="input-hasta",
                             type="number",
                             value=200
+                        )
+                    ]),
+                ]),
+
+                html.Br(),
+
+                # ===================
+                # FILA 2
+                # ===================
+
+                dbc.Row([
+
+                    dbc.Col([
+                        dbc.Label("Prob. Acción Extra"),
+
+                        dbc.Input(
+                            id="input-prob-extra",
+                            type="number",
+                            value=0.25,
+                            step=0.01,
+                            min=0,
+                            max=1
+                        )
+                    ]),
+
+                    dbc.Col([
+                        dbc.Label("Prob. Imagen"),
+
+                        dbc.Input(
+                            id="input-prob-imagen",
+                            type="number",
+                            value=0.30,
+                            step=0.01,
+                            min=0,
+                            max=1
+                        )
+                    ]),
+
+                    dbc.Col([
+                        dbc.Label("Prob. Carrusel"),
+
+                        dbc.Input(
+                            id="input-prob-carrusel",
+                            type="number",
+                            value=0.10,
+                            step=0.01,
+                            min=0,
+                            max=1
+                        )
+                    ]),
+
+                    dbc.Col([
+                        dbc.Label("Prob. Edición"),
+
+                        dbc.Input(
+                            id="input-prob-edicion",
+                            type="number",
+                            value=0.65,
+                            step=0.01,
+                            min=0,
+                            max=1
+                        )
+                    ]),
+
+                    dbc.Col([
+                        dbc.Label("Prob. Demora"),
+
+                        dbc.Input(
+                            id="input-prob-demora",
+                            type="number",
+                            value=0.35,
+                            step=0.01,
+                            min=0,
+                            max=1
                         )
                     ]),
                 ]),
@@ -258,10 +341,26 @@ app.layout = dbc.Container(
     State("input-desde", "value"),
     State("input-hasta", "value"),
 
+    State("input-prob-extra", "value"),
+    State("input-prob-imagen", "value"),
+    State("input-prob-carrusel", "value"),
+    State("input-prob-edicion", "value"),
+    State("input-prob-demora", "value"),
+
     prevent_initial_call=True
 )
 
-def run_sim(n_clicks, n, j, i):
+def run_sim(
+    n_clicks,
+    n,
+    j,
+    i,
+    prob_extra,
+    prob_imagen,
+    prob_carrusel,
+    prob_edicion,
+    prob_demora
+):
 
     if not n or n <= 0:
 
@@ -269,6 +368,16 @@ def run_sim(n_clicks, n, j, i):
             [], [], "", "", "",
             "", "", ""
         )
+
+    # =======================
+    # VALIDACIONES
+    # =======================
+
+    prob_extra = prob_extra or 0.25
+    prob_imagen = prob_imagen or 0.30
+    prob_carrusel = prob_carrusel or 0.10
+    prob_edicion = prob_edicion or 0.65
+    prob_demora = prob_demora or 0.35
 
     # =======================
     # ESTADO INICIAL
@@ -294,7 +403,21 @@ def run_sim(n_clicks, n, j, i):
 
         "max_tiempo": 0.0,
 
-        "min_tiempo": float("inf")
+        "min_tiempo": float("inf"),
+
+        # ===================
+        # PROBABILIDADES
+        # ===================
+
+        "prob_extra": prob_extra,
+
+        "prob_imagen": prob_imagen,
+
+        "prob_carrusel": prob_carrusel,
+
+        "prob_edicion": prob_edicion,
+
+        "prob_demora": prob_demora
     }
 
     # =======================
