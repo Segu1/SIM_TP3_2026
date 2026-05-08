@@ -227,6 +227,94 @@ form_card = dbc.Card(
                     ]),
                 ]),
 
+                html.Hr(),
+
+                # ===================
+                # DISTRIBUCIONES
+                # ===================
+
+                html.H5(
+                    "Parámetros de distribuciones"
+                ),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Media Normal"
+                        ),
+
+                        dbc.Input(
+                            id="input-media-normal",
+                            type="number",
+                            step=0.1,
+                            value=15
+                        )
+                    ]),
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Desv. Normal"
+                        ),
+
+                        dbc.Input(
+                            id="input-desv-normal",
+                            type="number",
+                            step=0.1,
+                            value=5
+                        )
+                    ]),
+                ]),
+
+                html.Br(),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Uniforme A"
+                        ),
+
+                        dbc.Input(
+                            id="input-unif-a",
+                            type="number",
+                            step=1,
+                            value=30
+                        )
+                    ]),
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Uniforme B"
+                        ),
+
+                        dbc.Input(
+                            id="input-unif-b",
+                            type="number",
+                            step=1,
+                            value=95
+                        )
+                    ]),
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Media Exponencial"
+                        ),
+
+                        dbc.Input(
+                            id="input-media-exp",
+                            type="number",
+                            step=0.1,
+                            value=8
+                        )
+                    ]),
+                ]),
+
                 dbc.Button(
                     "Simular",
                     id="btn",
@@ -447,6 +535,16 @@ app.layout = dbc.Container(
 
     State("input-prob-demora", "value"),
 
+    State("input-media-normal", "value"),
+
+    State("input-desv-normal", "value"),
+
+    State("input-unif-a", "value"),
+
+    State("input-unif-b", "value"),
+
+    State("input-media-exp", "value"),
+
     prevent_initial_call=True
 )
 
@@ -470,7 +568,17 @@ def run_sim(
 
         prob_extra,
 
-        prob_demora
+        prob_demora,
+
+        media_normal,
+
+        desv_normal,
+
+        uniforme_a,
+
+        uniforme_b,
+
+        media_exp
 ):
 
     if not n or n <= 0:
@@ -526,7 +634,26 @@ def run_sim(
             prob_extra,
 
         "prob_demora":
-            prob_demora
+            prob_demora,
+
+        # ===================
+        # DISTRIBUCIONES
+        # ===================
+
+        "media_normal":
+            media_normal,
+
+        "desv_normal":
+            desv_normal,
+
+        "uniforme_a":
+            uniforme_a,
+
+        "uniforme_b":
+            uniforme_b,
+
+        "media_exp":
+            media_exp
     }
 
     # =======================
