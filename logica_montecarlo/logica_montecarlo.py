@@ -6,21 +6,52 @@ import random
 # DISTRIBUCIONES
 # =======================
 
-def dist_normal(media=15.0, desv=5.0) -> int:
+def dist_normal(media=15.0, desv=5.0):
+    """
+    Distribución normal usando Box-Muller.
+    Devuelve:
+        valor, r1, r2
+    """
+
     r1 = random.random()
     r2 = random.random()
-    n1 = (math.sqrt(-2 * math.log(r1)) * math.cos(2 * math.pi * r2)) * desv + media
-    return max(0, math.trunc(n1))
+
+    n1 = (
+        math.sqrt(-2 * math.log(r1))
+        * math.cos(2 * math.pi * r2)
+    ) * desv + media
+
+    valor = max(0, math.trunc(n1))
+
+    return valor, r1, r2
 
 
-def dist_uniforme_tiempo(a=30, b=95) -> int:
+def dist_uniforme_tiempo(a=30, b=95):
+    """
+    Distribución uniforme.
+    Devuelve:
+        valor, rnd
+    """
+
     r = random.random()
-    return math.trunc(a + (b - a) * r)
+
+    valor = math.trunc(a + (b - a) * r)
+
+    return valor, r
 
 
-def dist_exp_tiempo_extra(media=8) -> int:
+def dist_exp_tiempo_extra(media=8):
+    """
+    Distribución exponencial.
+    Devuelve:
+        valor, rnd
+    """
+
     r = random.random()
-    return math.trunc(-media * math.log(1 - r))
+
+    valor = math.trunc(-media * math.log(1 - r))
+
+    return valor, r
 
 
 # =======================
@@ -54,60 +85,106 @@ def hay_demora(freq: float) -> int:
 
 def montecarlo_step(state: dict):
     """
-    Ejecuta UNA iteración del modelo.
+    Ejecuta UNA iteración del modelo Monte Carlo.
     """
 
-    # -------- estado --------
+    # =====================
+    # ESTADO
+    # =====================
+
     n = int(state["n"])
     i = int(state["i"])
 
     total_tiempo = float(state["total_tiempo"])
+
     cont_edicion_y_extra = int(state["cont_edicion_y_extra"])
-    cont_sin_pausa_sin_extra = int(state["cont_sin_pausa_sin_extra"])
+
+    cont_sin_pausa_sin_extra = int(
+        state["cont_sin_pausa_sin_extra"]
+    )
 
     max_tiempo = float(state["max_tiempo"])
     min_tiempo = float(state["min_tiempo"])
 
     # =====================
-    # SIMULACIÓN
+    # NUEVA ITERACIÓN
     # =====================
 
     iter_idx = i + 1
+
     tiempo_total = 0
 
-    # -------- FORMATO --------
+    # ==================================================
+    # FORMATO
+    # ==================================================
+
     rnd_formato = random.random()
+
     formato = tabla_de_freq_formatos(rnd_formato)
 
-    # -------- TIEMPO BASE --------
-    tiempo_base = dist_uniforme_tiempo()
+    # ==================================================
+    # TIEMPO BASE (UNIFORME)
+    # ==================================================
+
+    tiempo_base, rnd_uniforme = dist_uniforme_tiempo()
+
     tiempo_total += tiempo_base
 
-    # -------- EDICIÓN --------
+    # ==================================================
+    # EDICIÓN
+    # ==================================================
+
     rnd_edicion = random.random()
+
     hay_edicion_flag = se_realiza_edicion(rnd_edicion)
 
     tiempo_edicion = 0
+
+    rnd_norm_r1 = None
+    rnd_norm_r2 = None
+
     if hay_edicion_flag:
-        tiempo_edicion = dist_normal()
+
+        (
+            tiempo_edicion,
+            rnd_norm_r1,
+            rnd_norm_r2
+        ) = dist_normal()
+
         tiempo_total += tiempo_edicion
 
-    # -------- DEMORA --------
+    # ==================================================
+    # DEMORA
+    # ==================================================
+
     rnd_demora = random.random()
+
     incremento = 0
 
     if formato in ["imagen", "video"]:
+
         if hay_demora(rnd_demora):
+
             incremento = 0.8 * tiempo_base
+
             tiempo_total += incremento
 
-    # -------- ACCIÓN EXTRA --------
+    # ==================================================
+    # ACCIÓN EXTRA
+    # ==================================================
+
     rnd_extra = random.random()
+
     hay_extra_flag = tabla_accion_extra(rnd_extra)
 
     tiempo_extra = 0
+
+    rnd_exp = None
+
     if hay_extra_flag:
-        tiempo_extra = dist_exp_tiempo_extra()
+
+        tiempo_extra, rnd_exp = dist_exp_tiempo_extra()
+
         tiempo_total += tiempo_extra
 
     # =====================
@@ -123,35 +200,102 @@ def montecarlo_step(state: dict):
         cont_sin_pausa_sin_extra += 1
 
     max_tiempo = max(max_tiempo, tiempo_total)
+
     min_tiempo = min(min_tiempo, tiempo_total)
 
     i = iter_idx
 
     promedio = total_tiempo / i if i > 0 else 0
-    porcentaje = (cont_edicion_y_extra / i) * 100 if i > 0 else 0
+
+    porcentaje = (
+        (cont_edicion_y_extra / i) * 100
+        if i > 0 else 0
+    )
 
     # =====================
-    # FILA (tabla)
+    # FILA TABLA
     # =====================
 
     row = {
+
+        # ================= ITERACIÓN =================
+
         "Iteración": iter_idx,
-        "rnd_formato": round(rnd_formato, 5),
+
+        # ================= FORMATO =================
+
+        "rnd_formato": round(rnd_formato, 4),
         "Formato": formato,
+
+        # ================= UNIFORME =================
+
+        "rnd_uniforme": round(rnd_uniforme, 4),
         "Tiempo base": tiempo_base,
-        "rnd_edicion": round(rnd_edicion, 5),
-        "Edición": "Sí" if hay_edicion_flag else "No",
+
+        # ================= EDICIÓN =================
+
+        "rnd_edic": round(rnd_edicion, 4),
+
+        "Edición":
+            "Sí" if hay_edicion_flag else "No",
+
+        "rnd_norm_r1":
+            round(rnd_norm_r1, 4)
+            if rnd_norm_r1 is not None else "-",
+
+        "rnd_norm_r2":
+            round(rnd_norm_r2, 4)
+            if rnd_norm_r2 is not None else "-",
+
         "Tiempo edición": tiempo_edicion,
-        "rnd_demora": round(rnd_demora, 5),
-        "Demora": "Sí" if incremento > 0 else "No",
+
+        # ================= DEMORA =================
+
+        "rnd_dem": round(rnd_demora, 4),
+
+        "Rehacer - Demora":
+            "Sí" if incremento > 0 else "No",
+
         "Incremento": round(incremento, 2),
-        "rnd_extra": round(rnd_extra, 5),
-        "Extra": "Sí" if hay_extra_flag else "No",
+
+        # ================= EXTRA =================
+
+        "rnd_ext": round(rnd_extra, 4),
+
+        "Acc. Extra":
+            "Sí" if hay_extra_flag else "No",
+
+        "rnd_exp":
+            round(rnd_exp, 4)
+            if rnd_exp is not None else "-",
+
         "Tiempo extra": tiempo_extra,
-        "Tiempo total": round(tiempo_total, 2),
-        "Promedio acum": round(promedio, 2),
-        "% Edición+Extra": round(porcentaje, 2),
-        "Sin pausa ni extra (acum)": cont_sin_pausa_sin_extra
+
+        # ================= RESULTADOS =================
+
+        "Tiempo total":
+            round(tiempo_total, 2),
+
+        "Tiempo total acumulado":
+            round(total_tiempo, 2),
+
+        "Promedio":
+            round(promedio, 2),
+
+        "Cant de edic. extra":
+            cont_edicion_y_extra,
+
+        "% Edición+Extra":
+            round(porcentaje, 2),
+
+        "Sin pausa ni extra (acum)":
+            cont_sin_pausa_sin_extra,
+
+        "Máximo tiempo":
+            round(max_tiempo, 2),
+
+        "Mínimo tiempo":
+            round(min_tiempo, 2)
     }
 
     # =====================
@@ -169,9 +313,6 @@ def montecarlo_step(state: dict):
     }
 
     return new_state, row
-    
-
-    
 
    
 

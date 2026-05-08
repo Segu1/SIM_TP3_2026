@@ -4,7 +4,6 @@
 from dash import Output, Input, State, Dash, html, dcc, exceptions
 from dash.dash_table import DataTable
 import dash_bootstrap_components as dbc
-import math as _math
 
 from logica_montecarlo import logica_montecarlo
 
@@ -19,7 +18,7 @@ app = Dash(
 # =======================
 header = dbc.Container(
     [
-        html.H1("📊 Montecarlo — Simulación Instagram",
+        html.H1("📊 Montecarlo — Simulación",
                 className="display-6 fw-bold text-center mt-4 mb-2"),
         html.P(
             "Simulación probabilística con visualización en tiempo real.",
@@ -74,11 +73,45 @@ tabla = dbc.Card(
     dbc.CardBody(
         DataTable(
             id="tabla",
-            page_action="none",  #  muestra TODO
+
+            page_action="none",
+
             fixed_rows={"headers": True},
-            style_table={"height": "60vh", "overflowY": "auto"},
-            style_cell={"textAlign": "center", "fontSize": 13},
-            style_header={"fontWeight": "bold"}
+
+            # Scroll vertical + horizontal
+            style_table={
+                "height": "60vh",
+                "overflowY": "auto",
+                "overflowX": "auto",
+            },
+
+            # Estilo general de celdas
+            style_cell={
+                "textAlign": "center",
+                "fontSize": 13,
+
+                # Evita que las columnas exploten
+                "minWidth": "120px",
+                "width": "120px",
+                "maxWidth": "120px",
+
+                # Trunca texto largo
+                "overflow": "hidden",
+                "textOverflow": "ellipsis",
+                "whiteSpace": "nowrap",
+            },
+
+            style_header={
+                "fontWeight": "bold",
+                "backgroundColor": "#f8f9fa",
+                "position": "sticky",
+                "top": 0,
+                "zIndex": 1,
+            },
+
+            # Tooltip al pasar mouse
+            tooltip_delay=0,
+            tooltip_duration=None,
         )
     )
 )
