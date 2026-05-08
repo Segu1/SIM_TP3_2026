@@ -68,15 +68,39 @@ def tabla_accion_extra(
 def tabla_de_freq_formatos(
         freq: float,
         prob_imagen: float,
-        prob_carrusel: float
+        prob_carrusel: float,
+        prob_video: float
 ) -> str:
 
-    if freq < prob_imagen:
+    total = (
+        prob_imagen
+        + prob_carrusel
+        + prob_video
+    )
+
+    # Evita división por cero
+    if total == 0:
+
+        return "video"
+
+    # ===================
+    # NORMALIZACIÓN
+    # ===================
+
+    p_img = prob_imagen / total
+
+    p_car = prob_carrusel / total
+
+    # ===================
+    # INTERVALOS
+    # ===================
+
+    if freq < p_img:
 
         return "imagen"
 
     elif freq < (
-            prob_imagen + prob_carrusel
+            p_img + p_car
     ):
 
         return "carrusel"
@@ -167,6 +191,10 @@ def montecarlo_step(state: dict):
         state["prob_carrusel"]
     )
 
+    prob_video = float(
+        state["prob_video"]
+    )
+
     prob_edicion = float(
         state["prob_edicion"]
     )
@@ -192,7 +220,8 @@ def montecarlo_step(state: dict):
     formato = tabla_de_freq_formatos(
         rnd_formato,
         prob_imagen,
-        prob_carrusel
+        prob_carrusel,
+        prob_video
     )
 
     # ==================================================
@@ -296,8 +325,6 @@ def montecarlo_step(state: dict):
 
         cont_carrusel += 1
 
-    # MÁS DE 60 MINUTOS
-
     if tiempo_total > 60:
 
         cont_mayor_60_min += 1
@@ -359,12 +386,8 @@ def montecarlo_step(state: dict):
 
     row = {
 
-        # ================= ITERACIÓN =================
-
         "Iteración":
             iter_idx,
-
-        # ================= FORMATO =================
 
         "rnd_formato":
             round(rnd_formato, 4),
@@ -372,15 +395,11 @@ def montecarlo_step(state: dict):
         "Formato":
             formato,
 
-        # ================= UNIFORME =================
-
         "rnd_uniforme":
             round(rnd_uniforme, 4),
 
         "Tiempo base":
             tiempo_base,
-
-        # ================= EDICIÓN =================
 
         "rnd_edic":
             round(rnd_edicion, 2),
@@ -403,8 +422,6 @@ def montecarlo_step(state: dict):
         "Tiempo edición":
             tiempo_edicion,
 
-        # ================= DEMORA =================
-
         "rnd_dem":
             round(rnd_demora, 2)
             if rnd_demora
@@ -417,8 +434,6 @@ def montecarlo_step(state: dict):
 
         "Incremento":
             round(incremento, 2),
-
-        # ================= EXTRA =================
 
         "rnd_ext":
             round(rnd_extra, 2),
@@ -436,8 +451,6 @@ def montecarlo_step(state: dict):
         "Tiempo extra":
             tiempo_extra,
 
-        # ================= RESULTADOS =================
-
         "Tiempo total":
             round(tiempo_total, 2),
 
@@ -446,8 +459,6 @@ def montecarlo_step(state: dict):
 
         "Promedio":
             round(promedio, 2),
-
-        # ================= MÉTRICAS =================
 
         "Cant de edic + extra":
             cont_edicion_y_extra,
@@ -529,6 +540,9 @@ def montecarlo_step(state: dict):
         "prob_carrusel":
             prob_carrusel,
 
+        "prob_video":
+            prob_video,
+
         "prob_edicion":
             prob_edicion,
 
@@ -574,6 +588,8 @@ state = {
     "prob_imagen": 0.30,
 
     "prob_carrusel": 0.10,
+
+    "prob_video": 0.60,
 
     "prob_edicion": 0.65,
 

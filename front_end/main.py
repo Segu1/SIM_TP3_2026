@@ -1,9 +1,17 @@
 # =======================
-#  APP
+# APP
 # =======================
 
-from dash import Output, Input, State, Dash, html
+from dash import (
+    Output,
+    Input,
+    State,
+    Dash,
+    html
+)
+
 from dash.dash_table import DataTable
+
 import dash_bootstrap_components as dbc
 
 from logica_montecarlo import logica_montecarlo
@@ -25,12 +33,21 @@ header = dbc.Container(
     [
         html.H1(
             "📊 Montecarlo — Simulación",
-            className="display-6 fw-bold text-center mt-4 mb-2"
+            className=(
+                "display-6 fw-bold "
+                "text-center mt-4 mb-2"
+            )
         ),
 
         html.P(
-            "Simulación probabilística con visualización en tiempo real.",
-            className="lead text-center text-muted mb-4"
+            (
+                "Simulación probabilística "
+                "con visualización en tiempo real."
+            ),
+            className=(
+                "lead text-center "
+                "text-muted mb-4"
+            )
         ),
     ],
     fluid=True
@@ -42,7 +59,10 @@ header = dbc.Container(
 
 form_card = dbc.Card(
     [
-        dbc.CardHeader("Parámetros"),
+
+        dbc.CardHeader(
+            "Parámetros"
+        ),
 
         dbc.CardBody(
             [
@@ -54,7 +74,10 @@ form_card = dbc.Card(
                 dbc.Row([
 
                     dbc.Col([
-                        dbc.Label("Número de simulaciones (N)"),
+
+                        dbc.Label(
+                            "Número de simulaciones (N)"
+                        ),
 
                         dbc.Input(
                             id="input-n",
@@ -64,7 +87,10 @@ form_card = dbc.Card(
                     ]),
 
                     dbc.Col([
-                        dbc.Label("Fila desde (j)"),
+
+                        dbc.Label(
+                            "Fila desde (j)"
+                        ),
 
                         dbc.Input(
                             id="input-desde",
@@ -74,7 +100,10 @@ form_card = dbc.Card(
                     ]),
 
                     dbc.Col([
-                        dbc.Label("Fila hasta (i)"),
+
+                        dbc.Label(
+                            "Fila hasta (i)"
+                        ),
 
                         dbc.Input(
                             id="input-hasta",
@@ -84,76 +113,116 @@ form_card = dbc.Card(
                     ]),
                 ]),
 
-                html.Br(),
+                html.Hr(),
 
                 # ===================
-                # FILA 2
+                # PROBABILIDADES
                 # ===================
+
+                html.H5(
+                    "Probabilidades"
+                ),
 
                 dbc.Row([
 
                     dbc.Col([
-                        dbc.Label("Prob. Acción Extra"),
 
-                        dbc.Input(
-                            id="input-prob-extra",
-                            type="number",
-                            value=0.25,
-                            step=0.01,
-                            min=0,
-                            max=1
-                        )
-                    ]),
-
-                    dbc.Col([
-                        dbc.Label("Prob. Imagen"),
+                        dbc.Label(
+                            "Prob. Imagen"
+                        ),
 
                         dbc.Input(
                             id="input-prob-imagen",
                             type="number",
-                            value=0.30,
-                            step=0.01,
                             min=0,
-                            max=1
+                            max=1,
+                            step=0.01,
+                            value=0.30
                         )
                     ]),
 
                     dbc.Col([
-                        dbc.Label("Prob. Carrusel"),
+
+                        dbc.Label(
+                            "Prob. Carrusel"
+                        ),
 
                         dbc.Input(
                             id="input-prob-carrusel",
                             type="number",
-                            value=0.10,
-                            step=0.01,
                             min=0,
-                            max=1
+                            max=1,
+                            step=0.01,
+                            value=0.10
                         )
                     ]),
 
                     dbc.Col([
-                        dbc.Label("Prob. Edición"),
+
+                        dbc.Label(
+                            "Prob. Video"
+                        ),
+
+                        dbc.Input(
+                            id="input-prob-video",
+                            type="number",
+                            min=0,
+                            max=1,
+                            step=0.01,
+                            value=0.60
+                        )
+                    ]),
+                ]),
+
+                html.Br(),
+
+                dbc.Row([
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Prob. Edición"
+                        ),
 
                         dbc.Input(
                             id="input-prob-edicion",
                             type="number",
-                            value=0.65,
-                            step=0.01,
                             min=0,
-                            max=1
+                            max=1,
+                            step=0.01,
+                            value=0.65
                         )
                     ]),
 
                     dbc.Col([
-                        dbc.Label("Prob. Demora"),
+
+                        dbc.Label(
+                            "Prob. Acción Extra"
+                        ),
+
+                        dbc.Input(
+                            id="input-prob-extra",
+                            type="number",
+                            min=0,
+                            max=1,
+                            step=0.01,
+                            value=0.25
+                        )
+                    ]),
+
+                    dbc.Col([
+
+                        dbc.Label(
+                            "Prob. Demora"
+                        ),
 
                         dbc.Input(
                             id="input-prob-demora",
                             type="number",
-                            value=0.35,
-                            step=0.01,
                             min=0,
-                            max=1
+                            max=1,
+                            step=0.01,
+                            value=0.35
                         )
                     ]),
                 ]),
@@ -161,7 +230,7 @@ form_card = dbc.Card(
                 dbc.Button(
                     "Simular",
                     id="btn",
-                    className="mt-3",
+                    className="mt-4",
                     color="primary"
                 )
             ]
@@ -180,7 +249,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "Promedio: ",
-                html.Span(id="kpi-prom")
+                html.Span(
+                    id="kpi-prom"
+                )
             ],
             color="light"
         )
@@ -190,7 +261,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "% Edición+Extra: ",
-                html.Span(id="kpi-prob")
+                html.Span(
+                    id="kpi-prob"
+                )
             ],
             color="light"
         )
@@ -200,7 +273,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "Iteraciones: ",
-                html.Span(id="kpi-iter")
+                html.Span(
+                    id="kpi-iter"
+                )
             ],
             color="light"
         )
@@ -210,7 +285,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "Acciones Extra: ",
-                html.Span(id="kpi-extra")
+                html.Span(
+                    id="kpi-extra"
+                )
             ],
             color="light"
         )
@@ -220,7 +297,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "Carruseles: ",
-                html.Span(id="kpi-carrusel")
+                html.Span(
+                    id="kpi-carrusel"
+                )
             ],
             color="light"
         )
@@ -230,7 +309,9 @@ kpis = dbc.Row([
         dbc.Alert(
             [
                 "% > 60 min: ",
-                html.Span(id="kpi-60")
+                html.Span(
+                    id="kpi-60"
+                )
             ],
             color="light"
         )
@@ -246,11 +327,14 @@ tabla = dbc.Card(
     dbc.CardBody(
 
         DataTable(
+
             id="tabla",
 
             page_action="none",
 
-            fixed_rows={"headers": True},
+            fixed_rows={
+                "headers": True
+            },
 
             style_table={
                 "height": "60vh",
@@ -269,6 +353,7 @@ tabla = dbc.Card(
                 "maxWidth": "120px",
 
                 "whiteSpace": "normal",
+
                 "height": "auto",
 
                 "lineHeight": "15px",
@@ -304,6 +389,7 @@ tabla = dbc.Card(
 
 app.layout = dbc.Container(
     [
+
         header,
 
         form_card,
@@ -324,42 +410,67 @@ app.layout = dbc.Container(
 # =======================
 
 @app.callback(
+
     Output("tabla", "data"),
+
     Output("tabla", "columns"),
 
     Output("kpi-prom", "children"),
+
     Output("kpi-prob", "children"),
+
     Output("kpi-iter", "children"),
 
     Output("kpi-extra", "children"),
+
     Output("kpi-carrusel", "children"),
+
     Output("kpi-60", "children"),
 
     Input("btn", "n_clicks"),
 
     State("input-n", "value"),
+
     State("input-desde", "value"),
+
     State("input-hasta", "value"),
 
-    State("input-prob-extra", "value"),
     State("input-prob-imagen", "value"),
+
     State("input-prob-carrusel", "value"),
+
+    State("input-prob-video", "value"),
+
     State("input-prob-edicion", "value"),
+
+    State("input-prob-extra", "value"),
+
     State("input-prob-demora", "value"),
 
     prevent_initial_call=True
 )
 
 def run_sim(
-    n_clicks,
-    n,
-    j,
-    i,
-    prob_extra,
-    prob_imagen,
-    prob_carrusel,
-    prob_edicion,
-    prob_demora
+
+        n_clicks,
+
+        n,
+
+        j,
+
+        i,
+
+        prob_imagen,
+
+        prob_carrusel,
+
+        prob_video,
+
+        prob_edicion,
+
+        prob_extra,
+
+        prob_demora
 ):
 
     if not n or n <= 0:
@@ -368,16 +479,6 @@ def run_sim(
             [], [], "", "", "",
             "", "", ""
         )
-
-    # =======================
-    # VALIDACIONES
-    # =======================
-
-    prob_extra = prob_extra or 0.25
-    prob_imagen = prob_imagen or 0.30
-    prob_carrusel = prob_carrusel or 0.10
-    prob_edicion = prob_edicion or 0.65
-    prob_demora = prob_demora or 0.35
 
     # =======================
     # ESTADO INICIAL
@@ -409,24 +510,38 @@ def run_sim(
         # PROBABILIDADES
         # ===================
 
-        "prob_extra": prob_extra,
+        "prob_imagen":
+            prob_imagen,
 
-        "prob_imagen": prob_imagen,
+        "prob_carrusel":
+            prob_carrusel,
 
-        "prob_carrusel": prob_carrusel,
+        "prob_video":
+            prob_video,
 
-        "prob_edicion": prob_edicion,
+        "prob_edicion":
+            prob_edicion,
 
-        "prob_demora": prob_demora
+        "prob_extra":
+            prob_extra,
+
+        "prob_demora":
+            prob_demora
     }
 
     # =======================
     # RANGO TABLA
     # =======================
 
-    start = max(1, j or 1)
+    start = max(
+        1,
+        j or 1
+    )
 
-    end = max(start, i or 200)
+    end = max(
+        start,
+        i or 200
+    )
 
     subset = []
 
@@ -445,14 +560,26 @@ def run_sim(
 
         last = row
 
-        if start <= row["Iteración"] <= end:
+        if (
+                start
+                <= row["Iteración"]
+                <= end
+        ):
+
             subset.append(row)
 
     # =======================
     # AGREGAR ÚLTIMA FILA
     # =======================
 
-    if last and (last["Iteración"] > end):
+    if (
+            last
+            and (
+                last["Iteración"]
+                > end
+            )
+    ):
+
         subset.append(last)
 
     if not subset:
